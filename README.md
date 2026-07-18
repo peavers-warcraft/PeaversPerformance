@@ -1,55 +1,65 @@
 # PeaversPerformance
 
-One-click graphics presets for more FPS in retail World of Warcraft — transparently.
+[![AddonSentry](https://addonsentry.io/api/public/repos/peavers-warcraft/PeaversPerformance/badge.svg)](https://addonsentry.io/dashboard/peavers-warcraft/PeaversPerformance)
 
-Popular "FPS boost" UI packs get much of their reputation by quietly lowering graphics
-console variables (draw distance, shadows, ground clutter, and so on). PeaversPerformance
-does the same thing honestly: three preset buttons that batch-apply graphics CVars, a
-full list of exactly what each one changes, and a restore button that puts everything
-back the way you had it.
+A World of Warcraft addon that boosts FPS with three transparent one-click graphics presets, showing exactly which CVars change and restoring your original settings on demand.
 
-## Presets
+## Features
 
-- **Quality** — mild FPS wins, keeps it pretty
-- **Balanced** — noticeable FPS gains, moderate visual cost
-- **Performance** — maximum FPS, potato mode
-
-Every preset shows its complete CVar list (current value → new value) in the settings
-panel before you click anything.
-
-## Safety floor
-
-All three presets — including Performance — keep:
-
-- `projectedTextures = 1` — ground danger swirlies are never turned off
-- Spell Density never below "Some" (`graphicsSpellDensity >= 1`) — essential spell effects
-  are always kept
-
-The addon never touches `maxFPS`, spell queue window, input latency, sound, camera, or
-nameplate CVars.
-
-## Restore
-
-Before the first preset is applied, your current value of every CVar the presets touch
-is snapshotted. **Restore my original settings** puts every one of them back and clears
-the snapshot. Switching between presets keeps the original snapshot — restore always
-returns you to your pre-preset settings.
+<!-- peavers:features -->
+- Three one-click graphics presets: Quality, Balanced, and Performance
+- Full transparency - every preset lists exactly which CVars it changes, with current and new values
+- Snapshots your original settings before the first preset and restores them with one click
+- Safety floor in every tier: ground danger indicators stay on and essential spell effects are always kept
+- Applies to raids and battlegrounds too, and queues safely if you're in combat
+<!-- /peavers:features -->
 
 ## Usage
 
-- `/pperf` — open settings
-- `/pperf quality` / `balanced` / `performance` — apply a preset
-- `/pperf restore` — restore your original settings
-- `/pperf status` — show the active preset
+<!-- peavers:usage -->
+Popular "FPS boost" UI packs get much of their reputation by quietly lowering graphics
+settings. PeaversPerformance does the same thing honestly - pick a preset, see exactly
+what it changes, and restore your own settings whenever you like.
 
-## Notes
+1. Open the settings with `/pperf` (or `/pconfig` > Performance)
+2. Expand "What 'Performance' changes" to review any preset before applying
+3. Click a preset button to apply it
+4. Click "Restore my original settings" at any time to undo everything
 
-- Presets are applied once; the values persist in WoW's own config. The addon does not
-  re-apply anything at login.
-- Coexists fine with PeaversCVars — different SavedVariables and no login writes.
-- If you're in combat, the action is queued and runs when combat ends.
+### Slash Commands
 
-## Dependencies
+- `/pperf` - Open settings
+- `/pperf quality` - Mild FPS wins, keeps it pretty
+- `/pperf balanced` - Noticeable FPS gains, moderate visual cost
+- `/pperf performance` - Maximum FPS, potato mode
+- `/pperf restore` - Restore your original settings
+- `/pperf status` - Show the active preset
+<!-- /peavers:usage -->
 
-- [PeaversCommons](https://github.com/peavers-warcraft/PeaversCommons)
-- [PeaversConfig](https://github.com/peavers-warcraft/PeaversConfig)
+## Configuration
+
+<!-- peavers:configuration -->
+Access the preset panel through `/pperf`:
+
+- **Preset buttons**: Apply Quality, Balanced, or Performance with one click
+- **Restore my original settings**: Return every CVar to its pre-preset value
+- **Full Transparency sections**: Per-preset list of every CVar with current and new values
+<!-- /peavers:configuration -->
+
+
+## Installation
+
+### Recommended: PeaversUpdater
+
+Download and install [PeaversUpdater](https://github.com/peavers-warcraft/PeaversUpdater/releases/latest), the desktop updater for the whole Peavers collection. It installs PeaversPerformance together with its required dependencies and delivers updates before they reach CurseForge.
+
+### Alternative: CurseForge
+
+1. Download from [CurseForge](https://www.curseforge.com/wow/addons/peaversperformance)
+2. Ensure [PeaversCommons](https://www.curseforge.com/wow/addons/peaverscommons) is also installed
+3. Ensure [PeaversConfig](https://www.curseforge.com/wow/addons/peaversconfig) is also installed
+4. Enable the addon on the character selection screen
+
+---
+
+*Part of the [Peavers](https://peavers.io) addon collection · [Report an issue](https://github.com/peavers-warcraft/PeaversPerformance/issues) · [Support development on Patreon](https://www.patreon.com/Peavers)*
