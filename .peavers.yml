@@ -4,8 +4,7 @@
 iconType: SystemIcon
 
 # CurseForge project ID for download statistics
-# TODO: create the CurseForge project and fill in the real ID
-curseForgeProjectId: 0
+curseForgeProjectId: 1615405
 
 # Tags for filtering and categorization
 tags:
