@@ -1,0 +1,14 @@
+# .peavers.yml - Addon metadata for peavers.io website
+
+# Icon to display on website
+iconType: SystemIcon
+
+# CurseForge project ID for download statistics
+# TODO: create the CurseForge project and fill in the real ID
+curseForgeProjectId: 0
+
+# Tags for filtering and categorization
+tags:
+  - performance
+  - graphics
+  - fps

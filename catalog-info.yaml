@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: PeaversPerformance
+  description: "A World of Warcraft addon that applies transparent one-click graphics presets for more FPS."
+  annotations:
+    github.com/project-slug: peavers-warcraft/PeaversPerformance
+spec:
+  type: library
+  lifecycle: production
+  owner: peavers-warcraft

@@ -1,0 +1,26 @@
+## Interface: 120001, 120005, 120007
+
+## Title: |cff3abdf7Peavers|rPerformance
+## Notes: One-click graphics presets for more FPS - transparently
+## Author: Peavers
+## Version: 1.0.0
+
+## IconTexture: Interface\AddOns\PeaversCommons\src\Media\Icon.tga
+## Category-enUS: Peavers
+
+## X-Website: https://peavers.io
+## X-Source-Code: https://github.com/peavers-warcraft/PeaversPerformance
+## X-Curse-Project-ID: 0
+
+## Dependencies: PeaversCommons, PeaversConfig
+## SavedVariables: PeaversPerformanceDB
+
+Changelog.lua
+
+src\Core\Presets.lua
+src\Utils\Config.lua
+src\Core\PresetManager.lua
+src\Utils\ConfigUI.lua
+src\Utils\Patrons.lua
+
+src\Main.lua
