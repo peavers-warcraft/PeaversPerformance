@@ -2,12 +2,13 @@
 
 [![AddonSentry](https://addonsentry.io/api/public/repos/peavers-warcraft/PeaversPerformance/badge.svg)](https://addonsentry.io/dashboard/peavers-warcraft/PeaversPerformance)
 
-A World of Warcraft addon that boosts FPS with three transparent one-click graphics presets, showing exactly which CVars change and restoring your original settings on demand.
+A World of Warcraft addon with transparent one-click graphics presets spanning the whole scale, showing exactly which CVars change and restoring your original settings on demand.
 
 ## Features
 
 <!-- peavers:features -->
-- Three one-click graphics presets: Quality, Balanced, and Performance
+- Five one-click graphics presets spanning the whole scale: Maximum, Quality, Balanced, Performance, and Minimum
+- Auto-switch (opt-in): apply a chosen preset when you zone into a raid, Mythic+, or dungeon, and switch back in the open world
 - Full transparency - every preset lists exactly which CVars it changes, with current and new values
 - Snapshots your original settings before the first preset and restores them with one click
 - Safety floor in every tier: ground danger indicators stay on and essential spell effects are always kept
@@ -22,28 +23,33 @@ settings. PeaversPerformance does the same thing honestly - pick a preset, see e
 what it changes, and restore your own settings whenever you like.
 
 1. Open the settings with `/pperf` (or `/pconfig` > Performance)
-2. Expand "What 'Performance' changes" to review any preset before applying
-3. Click a preset button to apply it
-4. Click "Restore my original settings" at any time to undo everything
+2. Review any preset on the Transparency tab before applying
+3. Click a preset button on the Presets tab to apply it
+4. Optionally enable location-based switching on the Auto-Switch tab
+5. Click "Restore my original settings" at any time to undo everything
 
 ### Slash Commands
 
 - `/pperf` - Open settings
+- `/pperf max` - Everything cranked, for beefy rigs
 - `/pperf quality` - Mild FPS wins, keeps it pretty
 - `/pperf balanced` - Noticeable FPS gains, moderate visual cost
 - `/pperf performance` - Maximum FPS, potato mode
+- `/pperf min` - Absolute floor, everything off that can be off
 - `/pperf restore` - Restore your original settings
+- `/pperf auto` - Toggle auto-switching by location
 - `/pperf status` - Show the active preset
 <!-- /peavers:usage -->
 
 ## Configuration
 
 <!-- peavers:configuration -->
-Access the preset panel through `/pperf`:
+Access the preset panel through `/pperf`. Settings are organised into tabs:
 
-- **Preset buttons**: Apply Quality, Balanced, or Performance with one click
-- **Restore my original settings**: Return every CVar to its pre-preset value
-- **Full Transparency sections**: Per-preset list of every CVar with current and new values
+- **Presets**: Apply Maximum, Quality, Balanced, Performance, or Minimum with one click, and restore every CVar to its pre-preset value
+- **Auto-Switch**: Enable location-based switching and pick a preset (or "My original settings") per location - raid, Mythic+, dungeon, open world. Every automatic switch is announced in chat
+- **Transparency**: Per-preset list of every CVar it changes, with current and new values
+- **Information**: Overview and slash command reference
 <!-- /peavers:configuration -->
 
 
