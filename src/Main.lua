@@ -36,6 +36,17 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
     restore = function()
         addon.PresetManager.RestoreOriginal()
     end,
+    auto = function()
+        addon.Config.autoSwitchEnabled = not addon.Config.autoSwitchEnabled
+        addon.Config:Save()
+        Utils.Print(addon, "Auto-switch " .. (addon.Config.autoSwitchEnabled and "enabled" or "disabled") .. ".")
+        if addon.Config.autoSwitchEnabled then
+            addon.AutoSwitch.Evaluate(true)
+        end
+        if addon.ConfigUI and addon.ConfigUI.Refresh then
+            addon.ConfigUI:Refresh()
+        end
+    end,
     status = function()
         local state = addon.PresetManager.GetStatus()
         if state.active then
@@ -46,6 +57,9 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
         if state.hasSnapshot then
             print("  Original settings are saved. /pperf restore brings them back.")
         end
+        if addon.Config.autoSwitchEnabled then
+            print("  Auto-switch is on. Configure it with /pperf.")
+        end
     end,
     help = function()
         Utils.Print(addon, "Commands:")
@@ -54,6 +68,7 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
         print("  /pperf balanced - Noticeable FPS gains, moderate visual cost")
         print("  /pperf performance - Maximum FPS, potato mode")
         print("  /pperf restore - Restore your original settings")
+        print("  /pperf auto - Toggle auto-switching by location")
         print("  /pperf status - Show the active preset")
     end,
 })
@@ -74,6 +89,9 @@ PeaversCommons.Events:Init(addonName, function()
     PeaversCommons.Events:RegisterEvent("PLAYER_REGEN_ENABLED", function()
         addon.PresetManager.HandleCombatEnd()
     end)
+
+    -- Location-based preset switching (opt-in via settings)
+    addon.AutoSwitch:Initialize()
 
     -- Use the centralized SettingsUI system from PeaversCommons
     C_Timer.After(0.5, function()
