@@ -210,8 +210,36 @@ function ConfigUI:Refresh()
     end
 end
 
+function ConfigUI:BuildInfoPage(parentFrame)
+    PeaversCommons.ConfigUIUtils.BuildInfoPage(parentFrame, "Performance", {
+        "Boosts FPS with three one-click graphics presets - Quality, Balanced, " ..
+            "and Performance. Popular FPS-boost UI packs get much of their " ..
+            "reputation by quietly lowering graphics settings; this addon does " ..
+            "the same thing honestly and shows you exactly what changes.",
+        { command = "/pperf", desc = "open the preset panel" },
+        { command = "/pperf quality", desc = "mild FPS wins, keeps it pretty" },
+        { command = "/pperf balanced", desc = "noticeable gains, moderate visual cost" },
+        { command = "/pperf performance", desc = "maximum FPS, potato mode" },
+        { command = "/pperf restore", desc = "restore your original settings" },
+        { command = "/pperf status", desc = "show the active preset" },
+
+        { header = "Nothing is hidden, nothing is lost" },
+        "Every preset lists each console variable it changes with the current " ..
+            "and new value - expand the transparency section before applying. " ..
+            "Your original settings are snapshotted before the first preset and " ..
+            "one click restores every one of them.",
+
+        { header = "Safety floor" },
+        "Every tier keeps ground danger indicators on and essential spell " ..
+            "effects visible - the addon will not trade mechanics visibility " ..
+            "for frames. Presets apply in raids and battlegrounds too, and " ..
+            "queue safely if you are in combat.",
+    })
+end
+
 function ConfigUI:GetPages()
     return {
+        { key = "info", label = "Information", builder = function(f) ConfigUI:BuildInfoPage(f) end },
         { key = "presets", label = "Presets", builder = function(f) ConfigUI:BuildPresetsPage(f) end },
     }
 end
