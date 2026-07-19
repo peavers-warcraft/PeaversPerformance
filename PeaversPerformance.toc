@@ -3,7 +3,7 @@
 ## Title: |cff3abdf7Peavers|rPerformance
 ## Notes: One-click graphics presets for more FPS - transparently
 ## Author: Peavers
-## Version: 1.0.5
+## Version: 1.0.6
 
 ## IconTexture: Interface\AddOns\PeaversCommons\src\Media\Icon.tga
 ## Category-enUS: Peavers
