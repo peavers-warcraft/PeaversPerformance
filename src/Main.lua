@@ -24,6 +24,12 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
     default = function()
         addon.ConfigUI:OpenOptions()
     end,
+    maximum = function()
+        addon.PresetManager.ApplyPreset("maximum")
+    end,
+    max = function()
+        addon.PresetManager.ApplyPreset("maximum")
+    end,
     quality = function()
         addon.PresetManager.ApplyPreset("quality")
     end,
@@ -32,6 +38,12 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
     end,
     performance = function()
         addon.PresetManager.ApplyPreset("performance")
+    end,
+    minimum = function()
+        addon.PresetManager.ApplyPreset("minimum")
+    end,
+    min = function()
+        addon.PresetManager.ApplyPreset("minimum")
     end,
     restore = function()
         addon.PresetManager.RestoreOriginal()
@@ -64,9 +76,11 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
     help = function()
         Utils.Print(addon, "Commands:")
         print("  /pperf - Open settings")
+        print("  /pperf max - Everything cranked, for beefy rigs")
         print("  /pperf quality - Mild FPS wins, keeps it pretty")
         print("  /pperf balanced - Noticeable FPS gains, moderate visual cost")
         print("  /pperf performance - Maximum FPS, potato mode")
+        print("  /pperf min - Absolute floor, everything off that can be off")
         print("  /pperf restore - Restore your original settings")
         print("  /pperf auto - Toggle auto-switching by location")
         print("  /pperf status - Show the active preset")
