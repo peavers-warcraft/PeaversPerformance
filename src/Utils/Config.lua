@@ -11,6 +11,16 @@ local ConfigManager = PeaversCommons.ConfigManager
 local DEFAULTS = {
     -- "quality" | "balanced" | "performance" | false (none active)
     activePreset = false,
+
+    -- Auto-switch: apply a preset based on where the player is.
+    -- Per-context targets: "none" (leave alone) | a preset key | "restore"
+    -- (back to the pre-preset snapshot).
+    autoSwitchEnabled = false,
+    autoSwitchRaid = "performance",
+    autoSwitchMythicPlus = "performance",
+    autoSwitchDungeon = "none",
+    autoSwitchWorld = "restore",
+
     DEBUG_ENABLED = false,
 }
 

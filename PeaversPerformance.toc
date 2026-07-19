@@ -20,6 +20,7 @@ Changelog.lua
 src\Core\Presets.lua
 src\Utils\Config.lua
 src\Core\PresetManager.lua
+src\Core\AutoSwitch.lua
 src\Utils\ConfigUI.lua
 src\Utils\Patrons.lua
 
