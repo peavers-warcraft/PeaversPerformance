@@ -3,22 +3,36 @@ local addonName, addon = ...
 local PeaversCommons = _G.PeaversCommons
 local Utils = PeaversCommons.Utils
 
--- Applies the preset the user picked for wherever they are (raid, Mythic+,
--- dungeon, open world). Fully opt-in: does nothing unless
+-- Applies the preset the user picked for wherever they are (raid, Mythic+ or
+-- Challenge Mode where the client has one, dungeon, open world). Fully opt-in:
+-- does nothing unless
 -- Config.autoSwitchEnabled is true, and any context set to "none" is left
 -- alone so manual choices survive there.
 
 local AutoSwitch = {}
 addon.AutoSwitch = AutoSwitch
 
+local Client = addon.Client
+
 -- UI display order. configKey holds that context's target:
--- "none" | preset key | "restore".
+-- "none" | preset key | "restore". short is the label for one-line summaries.
+--
+-- Other addons read this list (the PeaversUI installer builds its graphics
+-- screen from it), so its shape and keys are a contract. What changes per
+-- client is only which entries are in it: the difficulty-8 context keeps the
+-- key "mythicplus" and its config key everywhere so saved choices and readers
+-- never need to know which client they are on, but it is named Challenge Mode
+-- on Mists Classic and left out entirely on Era and Anniversary, which have no
+-- timed dungeons to offer.
 AutoSwitch.contexts = {
-    { key = "raid",       name = "Raid",       configKey = "autoSwitchRaid" },
-    { key = "mythicplus", name = "Mythic+",    configKey = "autoSwitchMythicPlus" },
-    { key = "dungeon",    name = "Dungeon",    configKey = "autoSwitchDungeon" },
-    { key = "world",      name = "Open world", configKey = "autoSwitchWorld" },
+    { key = "raid",       name = "Raid",       short = "Raid",    configKey = "autoSwitchRaid" },
 }
+if Client.hasChallengeDungeons then
+    table.insert(AutoSwitch.contexts,
+        { key = "mythicplus", name = Client.challengeName, short = Client.challengeShort, configKey = "autoSwitchMythicPlus" })
+end
+table.insert(AutoSwitch.contexts, { key = "dungeon", name = "Dungeon",    short = "Dungeon", configKey = "autoSwitchDungeon" })
+table.insert(AutoSwitch.contexts, { key = "world",   name = "Open world", short = "World",   configKey = "autoSwitchWorld" })
 
 local contextByKey = {}
 for _, ctx in ipairs(AutoSwitch.contexts) do
@@ -37,6 +51,24 @@ function AutoSwitch.GetContextName(key)
     return ctx and ctx.name or "Unknown"
 end
 
+-- The instance kinds this client can switch on, as prose for help text:
+-- "a raid, Mythic+, or dungeon" on retail, "a raid or dungeon" on Era.
+function AutoSwitch.GetInstanceListText()
+    local names = {}
+    for _, ctx in ipairs(AutoSwitch.contexts) do
+        if ctx.key ~= "world" then
+            table.insert(names, ctx.key == "mythicplus" and ctx.name or ctx.name:lower())
+        end
+    end
+
+    if #names == 1 then
+        return "a " .. names[1]
+    elseif #names == 2 then
+        return "a " .. names[1] .. " or " .. names[2]
+    end
+    return "a " .. table.concat(names, ", ", 1, #names - 1) .. ", or " .. names[#names]
+end
+
 -- Maps the player's location to a context key, or nil for places deliberately
 -- left alone (battlegrounds, arenas, scenarios).
 function AutoSwitch.GetContext()
@@ -47,8 +79,11 @@ function AutoSwitch.GetContext()
     end
 
     if instanceType == "party" then
+        -- Difficulty 8 is a Mythic+ keystone on retail and a Challenge Mode
+        -- on Mists Classic. Guarded on the context existing so a client
+        -- without one can never hand back a key nothing is configured for.
         local _, _, difficultyID = GetInstanceInfo()
-        if difficultyID == DIFFICULTY_MYTHIC_KEYSTONE then
+        if difficultyID == DIFFICULTY_MYTHIC_KEYSTONE and contextByKey.mythicplus then
             return "mythicplus"
         end
         return "dungeon"
@@ -68,7 +103,7 @@ local function ApplyForContext(context, force)
     if not addon.Config.autoSwitchEnabled then
         return
     end
-    if not context then
+    if not context or not contextByKey[context] then
         return
     end
     if context == lastContext and not force then
@@ -107,10 +142,19 @@ function AutoSwitch:Initialize()
         AutoSwitch.Evaluate()
     end)
 
-    -- A keystone starting changes the dungeon's difficulty without a loading
-    -- screen - and at the moment the event fires GetInstanceInfo() can still
-    -- report plain Mythic, so deriving the context would race and lose. The
-    -- event itself is authoritative: a challenge mode started, period.
+    -- Era and Anniversary have no timed dungeons, so there is nothing for the
+    -- challenge events to switch to. The events themselves do exist on every
+    -- Classic client; this is about meaning, not about the registration
+    -- erroring.
+    if not contextByKey.mythicplus then
+        return
+    end
+
+    -- A keystone (or, on Mists Classic, a Challenge Mode) starting changes the
+    -- dungeon's difficulty without a loading screen - and at the moment the
+    -- event fires GetInstanceInfo() can still report plain Mythic, so deriving
+    -- the context would race and lose. The event itself is authoritative: a
+    -- challenge mode started, period.
     PeaversCommons.Events:RegisterEvent("CHALLENGE_MODE_START", function()
         ApplyForContext("mythicplus")
     end)

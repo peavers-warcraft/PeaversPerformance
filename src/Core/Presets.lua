@@ -15,6 +15,12 @@ local addonName, addon = ...
 --   0=Essential 1=Some 2=Half 3=Most 4=Dynamic 5=Everything.
 -- * Never touched: maxFPS (foreground cap is a user choice), SpellQueueWindow,
 --   latency, sound, camera and nameplate CVars.
+-- * Written against retail. The Classic clients (Era, Anniversary, Mists
+--   Classic) lack graphicsSpellDensity, graphicsDepthEffects and
+--   graphicsComputeEffects; entries for a CVar the client does not have are
+--   skipped at apply time and hidden on the Transparency tab (see Client.lua),
+--   so one table serves every client. The projectedTextures floor exists on
+--   all of them.
 
 local Presets = {}
 addon.Presets = Presets

@@ -43,8 +43,10 @@ end
 -- CVar application
 --------------------------------------------------------------------------------
 
--- Unknown CVar names (renamed or removed by a patch) become visible failures
--- in the summary instead of Lua errors.
+-- Unknown CVar names become a false return instead of Lua errors. ApplyPreset
+-- filters out CVars the client never had before getting here (Client.HasCVar),
+-- so a failure that reaches the summary is a real one - a rejected value, or a
+-- CVar removed mid-session.
 local function SetCVarSafe(cvar, value)
     if C_CVar.GetCVar(cvar) == nil then
         return false, "unknown CVar"
@@ -90,20 +92,30 @@ function PresetManager.ApplyPreset(key)
 
     local applied = 0
     local failed = {}
+    local notHere = {}
     local needsRestart = false
 
     for _, entry in ipairs(preset.cvars) do
-        EnsureSnapshotEntry(entry.cvar)
-
-        local previous = C_CVar.GetCVar(entry.cvar)
-        local ok = SetCVarSafe(entry.cvar, entry.value)
-        if ok then
-            applied = applied + 1
-            if entry.restart and previous ~= nil and tostring(previous) ~= tostring(entry.value) then
-                needsRestart = true
-            end
+        -- A CVar this client simply does not have (a retail-only setting on a
+        -- Classic client) is not a failure - there is nothing to set, nothing
+        -- to snapshot and nothing to restore. Reporting it as failed would put
+        -- the same scary list in chat on every apply and every auto-switch.
+        -- It is counted separately and only mentioned with debug on.
+        if not addon.Client.HasCVar(entry.cvar) then
+            table.insert(notHere, entry.cvar)
         else
-            table.insert(failed, entry.cvar)
+            EnsureSnapshotEntry(entry.cvar)
+
+            local previous = C_CVar.GetCVar(entry.cvar)
+            local ok = SetCVarSafe(entry.cvar, entry.value)
+            if ok then
+                applied = applied + 1
+                if entry.restart and previous ~= nil and tostring(previous) ~= tostring(entry.value) then
+                    needsRestart = true
+                end
+            else
+                table.insert(failed, entry.cvar)
+            end
         end
     end
 
@@ -115,6 +127,10 @@ function PresetManager.ApplyPreset(key)
         summary = summary .. ", " .. #failed .. " failed (" .. table.concat(failed, ", ") .. ")"
     end
     Utils.Print(addon, summary .. ". /pperf restore undoes everything.")
+
+    if #notHere > 0 and addon.Config.DEBUG_ENABLED then
+        Utils.Print(addon, "Skipped " .. #notHere .. " not on this client (" .. table.concat(notHere, ", ") .. ").")
+    end
 
     if needsRestart then
         if RestartGx then
