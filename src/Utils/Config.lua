@@ -17,6 +17,8 @@ local DEFAULTS = {
     -- (back to the pre-preset snapshot).
     autoSwitchEnabled = false,
     autoSwitchRaid = "performance",
+    -- Difficulty-8 dungeons: Mythic+ on retail, Challenge Mode on Mists
+    -- Classic. Unused on Era and Anniversary, which have no such context.
     autoSwitchMythicPlus = "performance",
     autoSwitchDungeon = "none",
     autoSwitchWorld = "restore",

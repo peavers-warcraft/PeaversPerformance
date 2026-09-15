@@ -52,6 +52,13 @@ Access the preset panel through `/pperf`. Settings are organised into tabs:
 - **Information**: Overview and slash command reference
 <!-- /peavers:configuration -->
 
+## Classic clients
+
+PeaversPerformance also runs on Classic Era (including Hardcore and Season of Discovery), Anniversary, and Mists of Pandaria Classic. The presets are the same, with a few differences:
+
+- Settings the client does not have (spell density, depth effects, compute effects) are skipped rather than reported as failures, and are left out of the Transparency tab
+- The safety floor keeps ground danger indicators on; the "essential spell effects" guarantee relies on spell density, which only retail has
+- Auto-switch offers Challenge Mode instead of Mythic+ on Mists of Pandaria Classic, and has no timed-dungeon location on Era or Anniversary
 
 ## Installation
 

@@ -44,7 +44,17 @@ local ROW_HEIGHT = 18
 -- chained to each other so collapsing one reflows the ones below it.
 -- pageState.recalc is filled in by the page builder once all sections exist.
 local function CreateDetailSection(parentFrame, preset, width, anchorTo, indent, firstY, pageState, refreshList)
-    local contentHeight = #preset.cvars * ROW_HEIGHT + 12
+    -- Only the CVars this client has. A retail-only setting on a Classic client
+    -- is skipped by the apply engine, so listing it here with a "?" would show
+    -- a change that never happens.
+    local entries = {}
+    for _, entry in ipairs(preset.cvars) do
+        if addon.Client.HasCVar(entry.cvar) then
+            table.insert(entries, entry)
+        end
+    end
+
+    local contentHeight = #entries * ROW_HEIGHT + 12
     local section
 
     local function SizeSection(open)
@@ -68,7 +78,7 @@ local function CreateDetailSection(parentFrame, preset, width, anchorTo, indent,
         section:SetPoint("TOPLEFT", indent, firstY)
     end
 
-    for i, entry in ipairs(preset.cvars) do
+    for i, entry in ipairs(entries) do
         local rowY = -((i - 1) * ROW_HEIGHT) - 6
 
         local left = section.content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -220,7 +230,7 @@ function ConfigUI:BuildAutoSwitchPage(parentFrame)
     y = newY - 8
 
     local intro = W:CreateLabel(parentFrame,
-        "Automatically apply a preset when you zone into a raid, Mythic+, or dungeon, "
+        "Automatically apply a preset when you zone into " .. addon.AutoSwitch.GetInstanceListText() .. ", "
             .. "and switch back in the open world. 'No change' leaves that location alone. "
             .. "Every automatic switch is announced in chat.",
         { color = C.textSec })
@@ -285,7 +295,7 @@ function ConfigUI:BuildAutoSwitchPage(parentFrame)
 
     table.insert(list, function()
         local context = addon.AutoSwitch.GetContext()
-        local name = context and addon.AutoSwitch.GetContextName(context) or "Unmanaged (battleground, arena, scenario)"
+        local name = context and addon.AutoSwitch.GetContextName(context) or "Unmanaged (" .. addon.Client.unmanagedText .. ")"
         location:SetText("You are currently in: " .. name)
     end)
 
@@ -310,10 +320,27 @@ function ConfigUI:BuildTransparencyPage(parentFrame)
     local _, newY = W:CreateSectionHeader(parentFrame, "Full Transparency", indent, y)
     y = newY - 8
 
-    local intro = W:CreateLabel(parentFrame,
-        "Every CVar each preset sets, with your current value on the left of the arrow. "
-            .. "Nothing outside these lists is ever touched.",
-        { color = C.textSec })
+    local introText = "Every CVar each preset sets, with your current value on the left of the arrow. "
+        .. "Nothing outside these lists is ever touched."
+
+    -- Say out loud that the lists are shorter here than on retail, so a
+    -- Classic player comparing notes with a retail guide is not left wondering
+    -- where the spell density or depth-of-field rows went.
+    for _, key in ipairs(Presets.order) do
+        local missing = false
+        for _, entry in ipairs(Presets.Get(key).cvars) do
+            if not addon.Client.HasCVar(entry.cvar) then
+                missing = true
+                break
+            end
+        end
+        if missing then
+            introText = introText .. " Settings this client does not have are left out and never applied."
+            break
+        end
+    end
+
+    local intro = W:CreateLabel(parentFrame, introText, { color = C.textSec })
     intro:SetPoint("TOPLEFT", indent, y)
     intro:SetWidth(width)
     intro:SetJustifyH("LEFT")
@@ -348,6 +375,21 @@ end
 --------------------------------------------------------------------------------
 
 function ConfigUI:BuildInfoPage(parentFrame)
+    -- The "essential spell effects" half of the safety floor is
+    -- graphicsSpellDensity, which only retail has. On a client without it the
+    -- floor is just the ground indicators, so the promise is worded to match.
+    local safetyText
+    if addon.Client.HasCVar("graphicsSpellDensity") then
+        safetyText = "Every tier keeps ground danger indicators on and essential spell " ..
+            "effects visible - the addon will not trade mechanics visibility " ..
+            "for frames. Presets apply in raids and battlegrounds too, and " ..
+            "queue safely if you are in combat."
+    else
+        safetyText = "Every tier keeps ground danger indicators on - the addon " ..
+            "will not trade mechanics visibility for frames. Presets apply in " ..
+            "raids and battlegrounds too, and queue safely if you are in combat."
+    end
+
     PeaversCommons.ConfigUIUtils.BuildInfoPage(parentFrame, "Performance", {
         "One-click graphics presets spanning the whole scale - Maximum, " ..
             "Quality, Balanced, Performance, and Minimum. Popular FPS-boost UI " ..
@@ -365,8 +407,8 @@ function ConfigUI:BuildInfoPage(parentFrame)
         { command = "/pperf status", desc = "show the active preset" },
 
         { header = "Auto-switch by location" },
-        "Optionally apply a preset automatically when you zone into a raid, " ..
-            "Mythic+, or dungeon, and return to your original settings in the " ..
+        "Optionally apply a preset automatically when you zone into " ..
+            addon.AutoSwitch.GetInstanceListText() .. ", and return to your original settings in the " ..
             "open world. Pick a preset per location on the Auto-Switch tab - " ..
             "any location set to 'No change' is left alone, and every " ..
             "automatic switch is announced in chat.",
@@ -378,10 +420,7 @@ function ConfigUI:BuildInfoPage(parentFrame)
             "one click restores every one of them.",
 
         { header = "Safety floor" },
-        "Every tier keeps ground danger indicators on and essential spell " ..
-            "effects visible - the addon will not trade mechanics visibility " ..
-            "for frames. Presets apply in raids and battlegrounds too, and " ..
-            "queue safely if you are in combat.",
+        safetyText,
     })
 end
 
