@@ -87,6 +87,12 @@ PeaversCommons.SlashCommands:Register(addonName, "pperf", {
     end,
 })
 
+-- An out-of-date PeaversCommons means Client.lua could not get the client facts
+-- every preset and every piece of wording here is chosen from. Stopping is the
+-- honest answer: Commons has already said one line about updating, and carrying on
+-- with nil facts would apply a retail preset to whatever this turns out to be.
+if addon.Client.unsupported then return end
+
 -- Initialize the addon
 PeaversCommons.Events:Init(addonName, function()
     addon.Config:Initialize()

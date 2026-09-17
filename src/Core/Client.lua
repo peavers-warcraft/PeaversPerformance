@@ -12,75 +12,44 @@ local addonName, addon = ...
 -- Transparency tab leaves them out, and auto-switch and the help text word
 -- themselves for what the client really offers.
 --
--- PeaversCommons.Compat answers the "which client" question when the installed
--- PeaversCommons is new enough to have it. The released one does not, so the
--- same answer is derived here from the interface number - never assume Compat
--- exists.
+-- Which client this is comes from PeaversCommons.Client and from nowhere else.
+-- This file used to derive it again locally "in case Compat is missing", and the
+-- two copies drifted until they disagreed about Forever. Commons revision 4 is a
+-- hard requirement instead.
 
 local Client = {}
 addon.Client = Client
 
-local Compat = _G.PeaversCommons and _G.PeaversCommons.Compat
+-- PeaversCommons.Client is the one place that works out which game this is, and
+-- this file no longer has a second opinion. It used to: a Compat branch and an
+-- interface-number fallback that disagreed about WoW Forever, so the same addon
+-- behaved differently depending on whether Commons had loaded. Revision 4 is
+-- required rather than worked around, because a silent local answer is how that
+-- happened.
+--
+-- The names below are this addon's own vocabulary kept pointing at the shared
+-- facts, so every call site reads as before.
+local Commons = _G.PeaversCommons
+local shared = Commons and Commons.Require and Commons:Require(4, addonName) and Commons.Client
 
-local interface = (Compat and Compat.interface) or tonumber((select(4, GetBuildInfo()))) or 0
-Client.interface = interface
+if shared then
+    Client.interface = shared.interface
+    Client.isRetail = shared.isRetail
+    Client.isForever = shared.isForever
+    Client.isClassic = shared.isClassic
+    Client.isClassicEra = shared.isClassicEra
+    Client.isAnniversary = shared.isAnniversary
+    Client.isMists = shared.isMists
 
--- WoW Forever, settled first and from the interface number alone. It reports
--- WOW_PROJECT_ID equal to WOW_PROJECT_MAINLINE, so a mainline test reads it as
--- retail, and it continues the vanilla 1.x line, so a major-version test reads it
--- as Classic Era. Derived here rather than taken from Compat because a released
--- PeaversCommons does not know about it yet.
-Client.isForever = interface >= 16000 and interface < 20000
+    -- Timed dungeons, named for what players here call them.
+    Client.challengeName = shared.timedDungeonName
+    Client.challengeShort = shared.timedDungeonShort
+    Client.hasChallengeDungeons = shared.hasTimedDungeons
 
-if Compat and Compat.isForever ~= nil then
-    Client.isRetail = Compat.isRetail and true or false
-    Client.isClassicEra = Compat.isClassicEra and true or false
-    Client.isAnniversary = Compat.isAnniversary and true or false
-    Client.isMists = Compat.isMists and true or false
-else
-    -- WOW_PROJECT_ID is the authoritative retail check where it exists, but only
-    -- once Forever has been taken out of the running, because Forever answers it
-    -- the same way retail does. The interface number is the fallback and is what
-    -- separates the Classic clients from one another, because the project
-    -- constants for the newer Classic clients have been renamed before and the
-    -- interface number has not.
-    local project, mainline = _G.WOW_PROJECT_ID, _G.WOW_PROJECT_MAINLINE
-    if Client.isForever then
-        Client.isRetail = false
-    elseif project ~= nil and mainline ~= nil then
-        Client.isRetail = project == mainline
-    else
-        Client.isRetail = interface >= 100000
-    end
-
-    local classic = not Client.isRetail and not Client.isForever
-    Client.isClassicEra = classic and interface < 16000
-    Client.isAnniversary = classic and interface >= 20000 and interface < 30000
-    Client.isMists = classic and interface >= 50000 and interface < 60000
+    Client.unmanagedText = shared.unmanagedInstanceText
 end
-Client.isClassic = not Client.isRetail and not Client.isForever
 
--- Timed dungeons that report instance difficulty 8: Mythic+ on retail,
--- Challenge Mode on Mists Classic. Era and Anniversary have neither.
-if Client.isRetail then
-    Client.challengeName = "Mythic+"
-    Client.challengeShort = "M+"
-elseif Client.isMists then
-    Client.challengeName = "Challenge Mode"
-    Client.challengeShort = "CM"
-end
-Client.hasChallengeDungeons = Client.challengeName ~= nil
-
--- Instance types that exist here but that auto-switch deliberately leaves
--- alone. Only used for the "you are currently in" line, so it only has to be
--- honest, not exhaustive: Era has no arenas, and scenarios arrived in Mists.
-if Client.isRetail or Client.isMists then
-    Client.unmanagedText = "battleground, arena, scenario"
-elseif Client.isAnniversary then
-    Client.unmanagedText = "battleground, arena"
-else
-    Client.unmanagedText = "battleground"
-end
+Client.unsupported = not shared
 
 -- Does this client have the CVar at all? GetCVar returns nil for a name the
 -- client does not know (retail-only settings on Classic, or one renamed by a
