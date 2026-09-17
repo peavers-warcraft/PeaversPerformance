@@ -2,8 +2,11 @@ local addonName, addon = ...
 
 -- Which game client this is, and which graphics CVars it actually has.
 --
--- One package ships to retail and to the Classic clients (Era, Anniversary,
--- Mists of Pandaria Classic), and the preset tables are written against retail.
+-- One package ships to retail, to WoW Forever and to the Classic clients (Era,
+-- Anniversary, Mists of Pandaria Classic), and the presets are written against
+-- retail. Forever carries every graphics CVar retail does - it probes identically
+-- - so only the content questions below differ there: no timed dungeons, and
+-- nothing unmanaged beyond battlegrounds.
 -- Rather than keep a second copy of every tier per client, everything that
 -- cares asks here: the apply engine skips CVars the client does not have, the
 -- Transparency tab leaves them out, and auto-switch and the help text word
@@ -19,33 +22,43 @@ addon.Client = Client
 
 local Compat = _G.PeaversCommons and _G.PeaversCommons.Compat
 
-if Compat then
-    Client.interface = Compat.interface or 0
+local interface = (Compat and Compat.interface) or tonumber((select(4, GetBuildInfo()))) or 0
+Client.interface = interface
+
+-- WoW Forever, settled first and from the interface number alone. It reports
+-- WOW_PROJECT_ID equal to WOW_PROJECT_MAINLINE, so a mainline test reads it as
+-- retail, and it continues the vanilla 1.x line, so a major-version test reads it
+-- as Classic Era. Derived here rather than taken from Compat because a released
+-- PeaversCommons does not know about it yet.
+Client.isForever = interface >= 16000 and interface < 20000
+
+if Compat and Compat.isForever ~= nil then
     Client.isRetail = Compat.isRetail and true or false
     Client.isClassicEra = Compat.isClassicEra and true or false
     Client.isAnniversary = Compat.isAnniversary and true or false
     Client.isMists = Compat.isMists and true or false
 else
-    local interface = tonumber((select(4, GetBuildInfo()))) or 0
-    Client.interface = interface
-
-    -- WOW_PROJECT_ID is the authoritative retail check where it exists; the
-    -- interface number is the fallback and is what separates the Classic
-    -- clients from one another, because the project constants for the newer
-    -- Classic clients have been renamed before and the interface number has not.
+    -- WOW_PROJECT_ID is the authoritative retail check where it exists, but only
+    -- once Forever has been taken out of the running, because Forever answers it
+    -- the same way retail does. The interface number is the fallback and is what
+    -- separates the Classic clients from one another, because the project
+    -- constants for the newer Classic clients have been renamed before and the
+    -- interface number has not.
     local project, mainline = _G.WOW_PROJECT_ID, _G.WOW_PROJECT_MAINLINE
-    if project ~= nil and mainline ~= nil then
+    if Client.isForever then
+        Client.isRetail = false
+    elseif project ~= nil and mainline ~= nil then
         Client.isRetail = project == mainline
     else
         Client.isRetail = interface >= 100000
     end
 
-    local classic = not Client.isRetail
-    Client.isClassicEra = classic and interface < 20000
+    local classic = not Client.isRetail and not Client.isForever
+    Client.isClassicEra = classic and interface < 16000
     Client.isAnniversary = classic and interface >= 20000 and interface < 30000
     Client.isMists = classic and interface >= 50000 and interface < 60000
 end
-Client.isClassic = not Client.isRetail
+Client.isClassic = not Client.isRetail and not Client.isForever
 
 -- Timed dungeons that report instance difficulty 8: Mythic+ on retail,
 -- Challenge Mode on Mists Classic. Era and Anniversary have neither.
